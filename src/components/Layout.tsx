@@ -9,12 +9,17 @@ import {
   Settings, 
   User,
   Menu,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
+import { useAuth } from '../components/auth/AuthProvider';
+import { useSubscription } from '../hooks/useSubscription';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const { user, signOut } = useAuth();
+  const { plan, isActive } = useSubscription();
 
   const navigation = [
     { name: 'Home', href: '/', icon: Home },
@@ -26,6 +31,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   return (
     <div className="flex h-screen bg-cream-50">
       {/* Sidebar */}
@@ -35,6 +44,26 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <Heart className="h-8 w-8 text-primary-500" />
             <span className="ml-3 text-xl font-bold text-secondary-800">EchoCare</span>
           </div>
+          
+          {/* User info */}
+          {user && (
+            <div className="px-6 py-4 border-b border-cream-200">
+              <div className="flex items-center">
+                <div className="bg-primary-100 w-10 h-10 rounded-full flex items-center justify-center">
+                  <User className="h-5 w-5 text-primary-600" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-secondary-800">
+                    {user.email?.split('@')[0]}
+                  </p>
+                  {plan && isActive && (
+                    <p className="text-xs text-primary-600">{plan.name}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="mt-8 flex-grow flex flex-col">
             <nav className="flex-1 px-4 space-y-2">
               {navigation.map((item) => {
@@ -55,6 +84,17 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 );
               })}
             </nav>
+            
+            {/* Sign out button */}
+            <div className="px-4 pb-4">
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center px-3 py-3 text-sm font-medium text-secondary-600 hover:bg-secondary-50 hover:text-secondary-800 rounded-lg transition-all duration-200"
+              >
+                <LogOut className="h-5 w-5 mr-3" />
+                Sign Out
+              </button>
+            </div>
           </div>
           
           {/* Sponsor badges */}
@@ -111,6 +151,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   </Link>
                 );
               })}
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center px-3 py-2 text-sm font-medium text-secondary-600 hover:bg-secondary-50 rounded-md"
+              >
+                <LogOut className="h-4 w-4 mr-3" />
+                Sign Out
+              </button>
             </nav>
           </motion.div>
         )}

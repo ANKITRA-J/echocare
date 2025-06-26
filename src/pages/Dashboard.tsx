@@ -10,10 +10,16 @@ import {
   Video,
   Mic,
   Brain,
-  Shield
+  Shield,
+  Crown
 } from 'lucide-react';
+import { useAuth } from '../components/auth/AuthProvider';
+import { useSubscription } from '../hooks/useSubscription';
 
 const Dashboard: React.FC = () => {
+  const { user } = useAuth();
+  const { subscription, isActive, plan } = useSubscription();
+
   const recentMemories = [
     {
       id: 1,
@@ -57,6 +63,8 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const userName = user?.email?.split('@')[0] || 'User';
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -66,7 +74,7 @@ const Dashboard: React.FC = () => {
         transition={{ duration: 0.5 }}
         className="mb-8"
       >
-        <h1 className="text-3xl font-bold text-secondary-800 mb-2">Welcome back, Robert</h1>
+        <h1 className="text-3xl font-bold text-secondary-800 mb-2">Welcome back, {userName}</h1>
         <p className="text-secondary-600">Here's what's happening with your memory collection today.</p>
       </motion.div>
 
@@ -224,17 +232,55 @@ const Dashboard: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}
-            className="bg-gradient-to-r from-primary-500 to-secondary-500 rounded-xl shadow-lg p-6 text-white"
+            className={`rounded-xl shadow-lg p-6 text-white ${
+              isActive 
+                ? 'bg-gradient-to-r from-primary-500 to-secondary-500' 
+                : 'bg-gradient-to-r from-secondary-400 to-secondary-500'
+            }`}
           >
-            <h2 className="text-lg font-semibold mb-2">Premium Plan</h2>
+            <div className="flex items-center mb-2">
+              {isActive ? (
+                <Crown className="h-5 w-5 mr-2" />
+              ) : (
+                <Heart className="h-5 w-5 mr-2" />
+              )}
+              <h2 className="text-lg font-semibold">
+                {isActive ? plan?.name || 'Premium Plan' : 'Free Plan'}
+              </h2>
+            </div>
             <p className="text-primary-100 text-sm mb-4">
-              Unlimited memories, priority processing, and advanced AI features.
+              {isActive 
+                ? 'Unlimited memories, priority processing, and advanced AI features.'
+                : 'Upgrade to Premium for unlimited memories and advanced features.'
+              }
             </p>
             <div className="flex items-center justify-between">
-              <span className="text-sm">Next billing: Feb 15, 2024</span>
-              <button className="bg-white text-primary-600 px-3 py-1 rounded text-sm font-medium hover:bg-cream-50 transition-colors duration-200">
-                Manage
-              </button>
+              {isActive ? (
+                <>
+                  <span className="text-sm">
+                    {subscription?.current_period_end 
+                      ? `Next billing: ${new Date(subscription.current_period_end * 1000).toLocaleDateString()}`
+                      : 'Active subscription'
+                    }
+                  </span>
+                  <button 
+                    onClick={() => window.location.href = '/settings'}
+                    className="bg-white text-primary-600 px-3 py-1 rounded text-sm font-medium hover:bg-cream-50 transition-colors duration-200"
+                  >
+                    Manage
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span className="text-sm">Limited features available</span>
+                  <button 
+                    onClick={() => window.location.href = '/pricing'}
+                    className="bg-white text-primary-600 px-3 py-1 rounded text-sm font-medium hover:bg-cream-50 transition-colors duration-200"
+                  >
+                    Upgrade
+                  </button>
+                </>
+              )}
             </div>
           </motion.div>
         </div>

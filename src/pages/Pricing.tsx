@@ -11,8 +11,31 @@ import {
   Crown,
   Star
 } from 'lucide-react';
+import { useAuth } from '../components/auth/AuthProvider';
+import { useCheckout } from '../hooks/useCheckout';
+import { useSubscription } from '../hooks/useSubscription';
+import { products } from '../stripe-config';
 
 const Pricing: React.FC = () => {
+  const { user } = useAuth();
+  const { createCheckoutSession, loading: checkoutLoading, error: checkoutError } = useCheckout();
+  const { subscription, isActive } = useSubscription();
+
+  const handleSubscribe = async () => {
+    if (!user) {
+      window.location.href = '/signup';
+      return;
+    }
+
+    const product = products[0]; // EchoCare Premium
+    await createCheckoutSession({
+      priceId: product.priceId,
+      mode: product.mode,
+      successUrl: `${window.location.origin}/success`,
+      cancelUrl: `${window.location.origin}/pricing`,
+    });
+  };
+
   const plans = [
     {
       name: 'Basic',
@@ -36,11 +59,12 @@ const Pricing: React.FC = () => {
       buttonText: 'Get Started',
       buttonStyle: 'border border-secondary-300 text-secondary-700 hover:bg-secondary-50',
       popular: false,
-      icon: Heart
+      icon: Heart,
+      onClick: () => user ? window.location.href = '/dashboard' : window.location.href = '/signup'
     },
     {
       name: 'Premium',
-      price: '$9.99',
+      price: '$24.00',
       period: 'per month',
       description: 'Enhanced features for regular memory creation',
       features: [
@@ -55,14 +79,18 @@ const Pricing: React.FC = () => {
         'Custom memory themes'
       ],
       limitations: [],
-      buttonText: 'Start Premium',
-      buttonStyle: 'bg-primary-500 text-white hover:bg-primary-600',
+      buttonText: isActive ? 'Current Plan' : 'Start Premium',
+      buttonStyle: isActive 
+        ? 'bg-success-500 text-white cursor-not-allowed' 
+        : 'bg-primary-500 text-white hover:bg-primary-600',
       popular: true,
-      icon: Zap
+      icon: Zap,
+      onClick: isActive ? () => {} : handleSubscribe,
+      disabled: isActive
     },
     {
       name: 'Family',
-      price: '$24.99',
+      price: '$49.99',
       period: 'per month',
       description: 'Complete solution for families and legacy preservation',
       features: [
@@ -80,10 +108,12 @@ const Pricing: React.FC = () => {
         'API access'
       ],
       limitations: [],
-      buttonText: 'Start Family Plan',
-      buttonStyle: 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white hover:from-primary-600 hover:to-secondary-600',
+      buttonText: 'Coming Soon',
+      buttonStyle: 'bg-secondary-300 text-secondary-500 cursor-not-allowed',
       popular: false,
-      icon: Crown
+      icon: Crown,
+      onClick: () => {},
+      disabled: true
     }
   ];
 
@@ -142,6 +172,13 @@ const Pricing: React.FC = () => {
           Select the perfect plan for preserving and sharing precious memories with your loved ones.
         </p>
       </motion.div>
+
+      {/* Error Message */}
+      {checkoutError && (
+        <div className="mb-8 bg-error-50 border border-error-200 text-error-700 px-4 py-3 rounded-lg">
+          {checkoutError}
+        </div>
+      )}
 
       {/* Pricing Cards */}
       <div className="grid md:grid-cols-3 gap-8 mb-16">
@@ -206,10 +243,16 @@ const Pricing: React.FC = () => {
                 </div>
 
                 {/* CTA Button */}
-                <button className={`
-                  w-full py-3 px-6 rounded-lg font-semibold transition-all duration-200 ${plan.buttonStyle}
-                `}>
-                  {plan.buttonText}
+                <button 
+                  onClick={plan.onClick}
+                  disabled={plan.disabled || checkoutLoading}
+                  className={`
+                    w-full py-3 px-6 rounded-lg font-semibold transition-all duration-200 
+                    ${plan.buttonStyle}
+                    ${(plan.disabled || checkoutLoading) ? 'opacity-50 cursor-not-allowed' : ''}
+                  `}
+                >
+                  {checkoutLoading && plan.name === 'Premium' ? 'Processing...' : plan.buttonText}
                 </button>
 
                 {/* Limitations */}
@@ -357,12 +400,29 @@ const Pricing: React.FC = () => {
           Start your journey with EchoCare today and create lasting connections through AI-powered memory preservation.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button className="bg-primary-500 text-white px-8 py-3 rounded-lg hover:bg-primary-600 transition-colors duration-200 font-semibold">
-            Start Free Trial
-          </button>
-          <button className="border border-secondary-300 text-secondary-700 px-8 py-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200 font-semibold">
-            Schedule Demo
-          </button>
+          {!user ? (
+            <>
+              <button 
+                onClick={() => window.location.href = '/signup'}
+                className="bg-primary-500 text-white px-8 py-3 rounded-lg hover:bg-primary-600 transition-colors duration-200 font-semibold"
+              >
+                Start Free Trial
+              </button>
+              <button 
+                onClick={() => window.location.href = '/login'}
+                className="border border-secondary-300 text-secondary-700 px-8 py-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200 font-semibold"
+              >
+                Sign In
+              </button>
+            </>
+          ) : (
+            <button 
+              onClick={() => window.location.href = '/dashboard'}
+              className="bg-primary-500 text-white px-8 py-3 rounded-lg hover:bg-primary-600 transition-colors duration-200 font-semibold"
+            >
+              Go to Dashboard
+            </button>
+          )}
         </div>
       </motion.div>
     </div>
