@@ -10,7 +10,8 @@ import {
   User,
   Menu,
   X,
-  LogOut
+  LogOut,
+  Video
 } from 'lucide-react';
 import { useAuth } from '../components/auth/AuthProvider';
 import { useSubscription } from '../hooks/useSubscription';
@@ -26,6 +27,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Dashboard', href: '/dashboard', icon: User },
     { name: 'Memories', href: '/memories', icon: Library },
     { name: 'Voice Setup', href: '/voice-setup', icon: Mic },
+    { name: 'Avatar Studio', href: '/avatar-studio', icon: Video },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
 

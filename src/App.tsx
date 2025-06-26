@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard';
 import Onboarding from './pages/Onboarding';
 import MemoryLibrary from './pages/MemoryLibrary';
 import VoiceSetup from './pages/VoiceSetup';
+import AvatarStudio from './pages/AvatarStudio';
 import Settings from './pages/Settings';
 import Pricing from './pages/Pricing';
 
@@ -77,6 +78,19 @@ function App() {
                     transition={{ duration: 0.5 }}
                   >
                     <VoiceSetup />
+                  </motion.div>
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/avatar-studio" element={
+              <ProtectedRoute>
+                <Layout>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <AvatarStudio />
                   </motion.div>
                 </Layout>
               </ProtectedRoute>
