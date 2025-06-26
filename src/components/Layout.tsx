@@ -19,7 +19,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const { user, signOut } = useAuth();
-  const { plan, isActive } = useSubscription();
+  const { plan, isActive: isSubscriptionActive } = useSubscription();
 
   const navigation = [
     { name: 'Home', href: '/', icon: Home },
@@ -29,7 +29,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActiveRoute = (path: string) => location.pathname === path;
 
   const handleSignOut = async () => {
     await signOut();
@@ -56,7 +56,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   <p className="text-sm font-medium text-secondary-800">
                     {user.email?.split('@')[0]}
                   </p>
-                  {plan && isActive && (
+                  {plan && isSubscriptionActive && (
                     <p className="text-xs text-primary-600">{plan.name}</p>
                   )}
                 </div>
@@ -73,7 +73,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     key={item.name}
                     to={item.href}
                     className={`${
-                      isActive(item.href)
+                      isActiveRoute(item.href)
                         ? 'bg-primary-50 text-primary-600 border-r-2 border-primary-500'
                         : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-800'
                     } group flex items-center px-3 py-3 text-sm font-medium rounded-l-lg transition-all duration-200`}
@@ -141,7 +141,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     to={item.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`${
-                      isActive(item.href)
+                      isActiveRoute(item.href)
                         ? 'bg-primary-50 text-primary-600'
                         : 'text-secondary-600 hover:bg-secondary-50'
                     } flex items-center px-3 py-2 rounded-md text-sm font-medium`}
