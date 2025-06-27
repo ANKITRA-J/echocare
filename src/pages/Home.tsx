@@ -473,7 +473,7 @@ const Home: React.FC = () => {
                 <div className="text-secondary-400 text-sm">
                   Made with ❤️ by{' '}
                   <a 
-                    href="https://ankitraj.dev" 
+                    href="https://github.com/ANKITRA-J" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-primary-400 hover:text-primary-300 transition-colors duration-200"
