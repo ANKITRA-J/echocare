@@ -6,7 +6,8 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
-const TAVUS_API_KEY = Deno.env.get('TAVUS_API_KEY');
+// Updated Tavus API key
+const TAVUS_API_KEY = '905aa62889034645b92065b8dc0be56b';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -102,13 +103,13 @@ async function createAvatar(req: Request): Promise<Response> {
     const response = await fetch('https://tavusapi.com/v2/videos', {
       method: 'POST',
       headers: {
-        'x-api-key': TAVUS_API_KEY!,
+        'x-api-key': TAVUS_API_KEY,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         script: body.script,
-        replica_id: body.avatar_id,
-        voice_id: body.voice_id,
+        replica_id: body.avatar_id || undefined,
+        voice_id: body.voice_id || undefined,
         background: body.background || 'office',
         video_name: `Memory Video - ${new Date().toISOString()}`,
       }),
@@ -116,6 +117,7 @@ async function createAvatar(req: Request): Promise<Response> {
 
     if (!response.ok) {
       const errorData = await response.text();
+      console.error('Tavus API Error Response:', errorData);
       throw new Error(`Tavus API error: ${response.status} - ${errorData}`);
     }
 
@@ -147,7 +149,7 @@ async function createReplica(req: Request): Promise<Response> {
     const response = await fetch('https://tavusapi.com/v2/replicas', {
       method: 'POST',
       headers: {
-        'x-api-key': TAVUS_API_KEY!,
+        'x-api-key': TAVUS_API_KEY,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -159,6 +161,7 @@ async function createReplica(req: Request): Promise<Response> {
 
     if (!response.ok) {
       const errorData = await response.text();
+      console.error('Tavus API Error Response:', errorData);
       throw new Error(`Tavus API error: ${response.status} - ${errorData}`);
     }
 
@@ -188,13 +191,14 @@ async function getReplicas(): Promise<Response> {
     const response = await fetch('https://tavusapi.com/v2/replicas', {
       method: 'GET',
       headers: {
-        'x-api-key': TAVUS_API_KEY!,
+        'x-api-key': TAVUS_API_KEY,
         'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
       const errorData = await response.text();
+      console.error('Tavus API Error Response:', errorData);
       throw new Error(`Tavus API error: ${response.status} - ${errorData}`);
     }
 
@@ -224,13 +228,14 @@ async function getVideos(): Promise<Response> {
     const response = await fetch('https://tavusapi.com/v2/videos', {
       method: 'GET',
       headers: {
-        'x-api-key': TAVUS_API_KEY!,
+        'x-api-key': TAVUS_API_KEY,
         'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
       const errorData = await response.text();
+      console.error('Tavus API Error Response:', errorData);
       throw new Error(`Tavus API error: ${response.status} - ${errorData}`);
     }
 

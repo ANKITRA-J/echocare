@@ -15,10 +15,12 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../components/auth/AuthProvider';
 import { useSubscription } from '../hooks/useSubscription';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const { subscription, isActive, plan } = useSubscription();
+  const navigate = useNavigate();
 
   const recentMemories = [
     {
@@ -64,6 +66,23 @@ const Dashboard: React.FC = () => {
   };
 
   const userName = user?.email?.split('@')[0] || 'User';
+
+  // Quick Action Handlers
+  const handleUploadMemory = () => {
+    navigate('/memories');
+  };
+
+  const handleRecordVoice = () => {
+    navigate('/voice-setup');
+  };
+
+  const handleGenerateVideo = () => {
+    navigate('/avatar-studio');
+  };
+
+  const handlePlayMemory = (memory: any) => {
+    navigate('/memories');
+  };
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -114,7 +133,10 @@ const Dashboard: React.FC = () => {
             <div className="p-6 border-b border-cream-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-secondary-800">Recent Memories</h2>
-                <button className="text-primary-500 hover:text-primary-600 font-medium">
+                <button 
+                  onClick={() => navigate('/memories')}
+                  className="text-primary-500 hover:text-primary-600 font-medium"
+                >
                   View All
                 </button>
               </div>
@@ -127,6 +149,7 @@ const Dashboard: React.FC = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                   className="p-6 hover:bg-cream-50 transition-colors duration-200 group cursor-pointer"
+                  onClick={() => handlePlayMemory(memory)}
                 >
                   <div className="flex items-center space-x-4">
                     <div className="relative">
@@ -173,15 +196,24 @@ const Dashboard: React.FC = () => {
           >
             <h2 className="text-xl font-semibold text-secondary-800 mb-4">Quick Actions</h2>
             <div className="space-y-3">
-              <button className="w-full bg-primary-500 text-white p-4 rounded-lg hover:bg-primary-600 transition-colors duration-200 flex items-center justify-center">
+              <button 
+                onClick={handleUploadMemory}
+                className="w-full bg-primary-500 text-white p-4 rounded-lg hover:bg-primary-600 transition-colors duration-200 flex items-center justify-center"
+              >
                 <Upload className="h-5 w-5 mr-2" />
                 Upload New Memory
               </button>
-              <button className="w-full border border-secondary-200 text-secondary-700 p-4 rounded-lg hover:bg-secondary-50 transition-colors duration-200 flex items-center justify-center">
+              <button 
+                onClick={handleRecordVoice}
+                className="w-full border border-secondary-200 text-secondary-700 p-4 rounded-lg hover:bg-secondary-50 transition-colors duration-200 flex items-center justify-center"
+              >
                 <Mic className="h-5 w-5 mr-2" />
                 Record Voice Note
               </button>
-              <button className="w-full border border-secondary-200 text-secondary-700 p-4 rounded-lg hover:bg-secondary-50 transition-colors duration-200 flex items-center justify-center">
+              <button 
+                onClick={handleGenerateVideo}
+                className="w-full border border-secondary-200 text-secondary-700 p-4 rounded-lg hover:bg-secondary-50 transition-colors duration-200 flex items-center justify-center"
+              >
                 <Video className="h-5 w-5 mr-2" />
                 Generate Video
               </button>
@@ -264,7 +296,7 @@ const Dashboard: React.FC = () => {
                     }
                   </span>
                   <button 
-                    onClick={() => window.location.href = '/settings'}
+                    onClick={() => navigate('/settings')}
                     className="bg-white text-primary-600 px-3 py-1 rounded text-sm font-medium hover:bg-cream-50 transition-colors duration-200"
                   >
                     Manage
@@ -274,7 +306,7 @@ const Dashboard: React.FC = () => {
                 <>
                   <span className="text-sm">Limited features available</span>
                   <button 
-                    onClick={() => window.location.href = '/pricing'}
+                    onClick={() => navigate('/pricing')}
                     className="bg-white text-primary-600 px-3 py-1 rounded text-sm font-medium hover:bg-cream-50 transition-colors duration-200"
                   >
                     Upgrade

@@ -11,16 +11,19 @@ import {
   Menu,
   X,
   LogOut,
-  Video
+  Video,
+  Bell
 } from 'lucide-react';
 import { useAuth } from '../components/auth/AuthProvider';
 import { useSubscription } from '../hooks/useSubscription';
+import { useNotifications } from '../hooks/useNotifications';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const { user, signOut } = useAuth();
   const { plan, isActive: isSubscriptionActive } = useSubscription();
+  const { unreadCount } = useNotifications();
 
   const navigation = [
     { name: 'Home', href: '/', icon: Home },
@@ -60,6 +63,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   </p>
                   {plan && isSubscriptionActive && (
                     <p className="text-xs text-primary-600">{plan.name}</p>
+                  )}
+                </div>
+                {/* Notification Bell */}
+                <div className="ml-auto relative">
+                  <Bell className="h-5 w-5 text-secondary-600" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-error-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                      {unreadCount}
+                    </span>
                   )}
                 </div>
               </div>
@@ -120,12 +132,23 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <Heart className="h-6 w-6 text-primary-500" />
             <span className="ml-2 text-lg font-bold text-secondary-800">EchoCare</span>
           </div>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-md text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50"
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          <div className="flex items-center space-x-3">
+            {/* Mobile Notification Bell */}
+            <div className="relative">
+              <Bell className="h-5 w-5 text-secondary-600" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-error-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-md text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50"
+            >
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
 
         {mobileMenuOpen && (
