@@ -10,13 +10,16 @@ import {
   Users,
   ArrowRight,
   Play,
-  CheckCircle
+  CheckCircle,
+  Menu,
+  X
 } from 'lucide-react';
 import { useAuth } from '../components/auth/AuthProvider';
 
 const Home: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   // If user is logged in, redirect to dashboard
   React.useEffect(() => {
@@ -62,6 +65,97 @@ const Home: React.FC = () => {
 
   return (
     <div className="bg-cream-50 min-h-screen">
+      {/* Header */}
+      <header className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            {/* Logo */}
+            <div className="flex items-center">
+              <Heart className="h-8 w-8 text-primary-500" />
+              <span className="ml-3 text-xl font-bold text-secondary-800">EchoCare</span>
+            </div>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <a href="#features" className="text-secondary-600 hover:text-secondary-800 transition-colors duration-200">
+                Features
+              </a>
+              <a href="#how-it-works" className="text-secondary-600 hover:text-secondary-800 transition-colors duration-200">
+                How It Works
+              </a>
+              <Link to="/pricing" className="text-secondary-600 hover:text-secondary-800 transition-colors duration-200">
+                Pricing
+              </Link>
+              <a href="#contact" className="text-secondary-600 hover:text-secondary-800 transition-colors duration-200">
+                Contact
+              </a>
+            </nav>
+
+            {/* Desktop Auth Buttons */}
+            <div className="hidden md:flex items-center space-x-4">
+              <Link
+                to="/login"
+                className="text-secondary-700 hover:text-secondary-900 font-medium transition-colors duration-200"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors duration-200 font-medium"
+              >
+                Get Started
+              </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-md text-secondary-600 hover:text-secondary-800 hover:bg-secondary-50"
+            >
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="md:hidden py-4 border-t border-cream-200"
+            >
+              <nav className="flex flex-col space-y-4">
+                <a href="#features" className="text-secondary-600 hover:text-secondary-800 transition-colors duration-200">
+                  Features
+                </a>
+                <a href="#how-it-works" className="text-secondary-600 hover:text-secondary-800 transition-colors duration-200">
+                  How It Works
+                </a>
+                <Link to="/pricing" className="text-secondary-600 hover:text-secondary-800 transition-colors duration-200">
+                  Pricing
+                </Link>
+                <a href="#contact" className="text-secondary-600 hover:text-secondary-800 transition-colors duration-200">
+                  Contact
+                </a>
+                <div className="flex flex-col space-y-2 pt-4 border-t border-cream-200">
+                  <Link
+                    to="/login"
+                    className="text-secondary-700 hover:text-secondary-900 font-medium transition-colors duration-200"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors duration-200 font-medium text-center"
+                  >
+                    Get Started
+                  </Link>
+                </div>
+              </nav>
+            </motion.div>
+          )}
+        </div>
+      </header>
+
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
@@ -119,7 +213,7 @@ const Home: React.FC = () => {
       </div>
 
       {/* Features Section */}
-      <div className="py-20 bg-cream-50">
+      <div id="features" className="py-20 bg-cream-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -164,7 +258,7 @@ const Home: React.FC = () => {
       </div>
 
       {/* How It Works */}
-      <div className="py-20 bg-white">
+      <div id="how-it-works" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -284,6 +378,127 @@ const Home: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer id="contact" className="bg-secondary-800 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8">
+            {/* Company Info */}
+            <div className="md:col-span-2">
+              <div className="flex items-center mb-4">
+                <Heart className="h-8 w-8 text-primary-500" />
+                <span className="ml-3 text-xl font-bold">EchoCare</span>
+              </div>
+              <p className="text-secondary-300 mb-4 max-w-md">
+                Preserving precious memories through ethical AI technology. 
+                Helping families stay connected with compassionate, secure solutions.
+              </p>
+              <div className="flex space-x-4">
+                <a href="#" className="text-secondary-400 hover:text-white transition-colors duration-200">
+                  Privacy Policy
+                </a>
+                <a href="#" className="text-secondary-400 hover:text-white transition-colors duration-200">
+                  Terms of Service
+                </a>
+                <a href="#" className="text-secondary-400 hover:text-white transition-colors duration-200">
+                  Contact
+                </a>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+              <ul className="space-y-2">
+                <li>
+                  <a href="#features" className="text-secondary-400 hover:text-white transition-colors duration-200">
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <Link to="/pricing" className="text-secondary-400 hover:text-white transition-colors duration-200">
+                    Pricing
+                  </Link>
+                </li>
+                <li>
+                  <a href="#how-it-works" className="text-secondary-400 hover:text-white transition-colors duration-200">
+                    How It Works
+                  </a>
+                </li>
+                <li>
+                  <Link to="/signup" className="text-secondary-400 hover:text-white transition-colors duration-200">
+                    Get Started
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Support */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Support</h3>
+              <ul className="space-y-2">
+                <li>
+                  <a href="#" className="text-secondary-400 hover:text-white transition-colors duration-200">
+                    Help Center
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-secondary-400 hover:text-white transition-colors duration-200">
+                    Documentation
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-secondary-400 hover:text-white transition-colors duration-200">
+                    Community
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:support@echocare.com" className="text-secondary-400 hover:text-white transition-colors duration-200">
+                    Contact Support
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Footer */}
+          <div className="border-t border-secondary-700 mt-8 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <div className="text-secondary-400 text-sm mb-4 md:mb-0">
+                © 2024 EchoCare. All rights reserved.
+              </div>
+              
+              <div className="flex items-center space-x-6">
+                {/* Made with love by Ankit Raj */}
+                <div className="text-secondary-400 text-sm">
+                  Made with ❤️ by{' '}
+                  <a 
+                    href="https://ankitraj.dev" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary-400 hover:text-primary-300 transition-colors duration-200"
+                  >
+                    Ankit Raj
+                  </a>
+                </div>
+
+                {/* Built with Bolt.new badge */}
+                <a
+                  href="https://bolt.new"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xs font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-200 transform hover:scale-105"
+                >
+                  <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                  Built with Bolt.new
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
