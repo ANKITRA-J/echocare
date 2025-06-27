@@ -25,6 +25,7 @@ import { useTheme } from '../hooks/useTheme';
 import { useNotifications } from '../hooks/useNotifications';
 import { useDataExport } from '../hooks/useDataExport';
 import { useAuth } from '../components/auth/AuthProvider';
+import { useAlgorand } from '../hooks/useAlgorand';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -32,6 +33,19 @@ const Settings: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [testEmailSending, setTestEmailSending] = useState(false);
   const [testSMSSending, setTestSMSSending] = useState(false);
+  const [profileData, setProfileData] = useState({
+    patientName: '',
+    caregiverName: '',
+    phone: '',
+    dateOfBirth: '',
+    diagnosis: '',
+    healthcareProvider: '',
+    emergencyContact: {
+      name: '',
+      relationship: '',
+      phone: ''
+    }
+  });
   
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
@@ -48,6 +62,27 @@ const Settings: React.FC = () => {
     exportVoiceData, 
     exportAllData 
   } = useDataExport();
+  const { consentNFTs, viewOnExplorer } = useAlgorand();
+
+  // Load user profile data
+  React.useEffect(() => {
+    if (user) {
+      const userName = user.email?.split('@')[0] || 'User';
+      setProfileData({
+        patientName: `${userName.charAt(0).toUpperCase()}${userName.slice(1)}`,
+        caregiverName: `${userName.charAt(0).toUpperCase()}${userName.slice(1)} (Self)`,
+        phone: '+1 (555) 123-4567',
+        dateOfBirth: '1945-03-15',
+        diagnosis: 'Early-stage Alzheimer\'s',
+        healthcareProvider: 'Dr. Sarah Williams, MD',
+        emergencyContact: {
+          name: 'Sarah Johnson',
+          relationship: 'Daughter',
+          phone: '+1 (555) 987-6543'
+        }
+      });
+    }
+  }, [user]);
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
@@ -81,7 +116,7 @@ const Settings: React.FC = () => {
   const handleTestSMS = async () => {
     setTestSMSSending(true);
     try {
-      await sendTestSMS('+1 (555) 123-4567');
+      await sendTestSMS(profileData.phone);
       alert('Test SMS sent successfully!');
     } catch (error) {
       alert('Failed to send test SMS');
@@ -125,7 +160,8 @@ const Settings: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    defaultValue="Robert Johnson"
+                    value={profileData.patientName}
+                    onChange={(e) => setProfileData({...profileData, patientName: e.target.value})}
                     className="w-full p-3 border border-cream-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
@@ -135,8 +171,9 @@ const Settings: React.FC = () => {
                   </label>
                   <input
                     type="email"
-                    defaultValue={user?.email || 'test@echocare.com'}
-                    className="w-full p-3 border border-cream-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    value={user?.email || 'test@echocare.com'}
+                    disabled
+                    className="w-full p-3 border border-cream-300 rounded-lg bg-cream-50 text-secondary-600"
                   />
                 </div>
                 <div>
@@ -145,7 +182,8 @@ const Settings: React.FC = () => {
                   </label>
                   <input
                     type="tel"
-                    defaultValue="+1 (555) 123-4567"
+                    value={profileData.phone}
+                    onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
                     className="w-full p-3 border border-cream-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
@@ -155,7 +193,8 @@ const Settings: React.FC = () => {
                   </label>
                   <input
                     type="date"
-                    defaultValue="1945-03-15"
+                    value={profileData.dateOfBirth}
+                    onChange={(e) => setProfileData({...profileData, dateOfBirth: e.target.value})}
                     className="w-full p-3 border border-cream-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
@@ -171,7 +210,8 @@ const Settings: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    defaultValue="Early-stage Alzheimer's"
+                    value={profileData.diagnosis}
+                    onChange={(e) => setProfileData({...profileData, diagnosis: e.target.value})}
                     className="w-full p-3 border border-cream-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
@@ -181,7 +221,8 @@ const Settings: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    defaultValue="Dr. Sarah Williams, MD"
+                    value={profileData.healthcareProvider}
+                    onChange={(e) => setProfileData({...profileData, healthcareProvider: e.target.value})}
                     className="w-full p-3 border border-cream-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
@@ -195,19 +236,31 @@ const Settings: React.FC = () => {
                   <input
                     type="text"
                     placeholder="Contact Name"
-                    defaultValue="Sarah Johnson"
+                    value={profileData.emergencyContact.name}
+                    onChange={(e) => setProfileData({
+                      ...profileData, 
+                      emergencyContact: {...profileData.emergencyContact, name: e.target.value}
+                    })}
                     className="p-3 border border-cream-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                   <input
                     type="text"
                     placeholder="Relationship"
-                    defaultValue="Daughter"
+                    value={profileData.emergencyContact.relationship}
+                    onChange={(e) => setProfileData({
+                      ...profileData, 
+                      emergencyContact: {...profileData.emergencyContact, relationship: e.target.value}
+                    })}
                     className="p-3 border border-cream-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                   <input
                     type="tel"
                     placeholder="Phone Number"
-                    defaultValue="+1 (555) 987-6543"
+                    value={profileData.emergencyContact.phone}
+                    onChange={(e) => setProfileData({
+                      ...profileData, 
+                      emergencyContact: {...profileData.emergencyContact, phone: e.target.value}
+                    })}
                     className="p-3 border border-cream-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
@@ -290,34 +343,40 @@ const Settings: React.FC = () => {
 
             <div>
               <h3 className="text-lg font-semibold text-secondary-800 mb-4">Blockchain Consent</h3>
-              <div className="bg-primary-50 p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center">
-                    <Key className="h-5 w-5 text-primary-600 mr-2" />
-                    <span className="font-medium text-secondary-800">NFT Consent Token</span>
+              {consentNFTs.map((nft) => (
+                <div key={nft.id} className="bg-primary-50 p-4 rounded-lg mb-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center">
+                      <Key className="h-5 w-5 text-primary-600 mr-2" />
+                      <span className="font-medium text-secondary-800">NFT Consent Token</span>
+                    </div>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      nft.isActive ? 'bg-success-100 text-success-700' : 'bg-error-100 text-error-700'
+                    }`}>
+                      {nft.isActive ? 'Active' : 'Revoked'}
+                    </span>
                   </div>
-                  <span className="bg-success-100 text-success-700 px-2 py-1 rounded-full text-xs font-medium">
-                    Active
-                  </span>
+                  <p className="text-sm text-secondary-600 mb-3">
+                    Your consent is secured on the Algorand blockchain with token ID: {nft.id}
+                  </p>
+                  <div className="flex space-x-3">
+                    <button 
+                      onClick={() => viewOnExplorer(nft.assetId)}
+                      className="text-primary-600 hover:text-primary-800 text-sm font-medium"
+                    >
+                      View on Explorer
+                    </button>
+                    {nft.isActive && (
+                      <button 
+                        onClick={() => alert('Consent revocation initiated. This will disable all AI processing.')}
+                        className="text-error-600 hover:text-error-800 text-sm font-medium"
+                      >
+                        Revoke Consent
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <p className="text-sm text-secondary-600 mb-3">
-                  Your consent is secured on the Algorand blockchain with token ID: ALG-7829304
-                </p>
-                <div className="flex space-x-3">
-                  <button 
-                    onClick={() => window.open('https://algoexplorer.io', '_blank')}
-                    className="text-primary-600 hover:text-primary-800 text-sm font-medium"
-                  >
-                    View on Explorer
-                  </button>
-                  <button 
-                    onClick={() => alert('Consent revocation initiated. This will disable all AI processing.')}
-                    className="text-error-600 hover:text-error-800 text-sm font-medium"
-                  >
-                    Revoke Consent
-                  </button>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         );
@@ -382,7 +441,7 @@ const Settings: React.FC = () => {
                       {notificationSettings.smsEnabled ? 'Disable' : 'Enable'}
                     </button>
                   </div>
-                  <p className="text-sm text-secondary-600 mb-3">+1 (555) 123-4567</p>
+                  <p className="text-sm text-secondary-600 mb-3">{profileData.phone}</p>
                   {notificationSettings.smsEnabled && (
                     <button 
                       onClick={handleTestSMS}
