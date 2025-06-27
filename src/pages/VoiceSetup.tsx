@@ -386,7 +386,7 @@ const VoiceSetup: React.FC = () => {
             <div className="text-primary-100 text-sm">Accuracy Rate</div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
