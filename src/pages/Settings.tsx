@@ -24,6 +24,7 @@ import {
 import { useTheme } from '../hooks/useTheme';
 import { useNotifications } from '../hooks/useNotifications';
 import { useDataExport } from '../hooks/useDataExport';
+import { useAuth } from '../components/auth/AuthProvider';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -32,6 +33,7 @@ const Settings: React.FC = () => {
   const [testEmailSending, setTestEmailSending] = useState(false);
   const [testSMSSending, setTestSMSSending] = useState(false);
   
+  const { user } = useAuth();
   const { theme, setTheme } = useTheme();
   const { 
     settings: notificationSettings, 
@@ -67,7 +69,7 @@ const Settings: React.FC = () => {
   const handleTestEmail = async () => {
     setTestEmailSending(true);
     try {
-      await sendTestEmail('robert.johnson@email.com');
+      await sendTestEmail(user?.email || 'test@echocare.com');
       alert('Test email sent successfully!');
     } catch (error) {
       alert('Failed to send test email');
@@ -119,7 +121,7 @@ const Settings: React.FC = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-secondary-700 mb-2">
-                    Full Name
+                    Patient Name
                   </label>
                   <input
                     type="text"
@@ -133,7 +135,7 @@ const Settings: React.FC = () => {
                   </label>
                   <input
                     type="email"
-                    defaultValue="test@echocare.com"
+                    defaultValue={user?.email || 'test@echocare.com'}
                     className="w-full p-3 border border-cream-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
@@ -361,7 +363,7 @@ const Settings: React.FC = () => {
                     <h4 className="font-medium text-secondary-800">Email Notifications</h4>
                     <CheckCircle className="h-4 w-4 text-success-500" />
                   </div>
-                  <p className="text-sm text-secondary-600 mb-3">test@echocare.com</p>
+                  <p className="text-sm text-secondary-600 mb-3">{user?.email || 'test@echocare.com'}</p>
                   <button 
                     onClick={handleTestEmail}
                     disabled={testEmailSending}

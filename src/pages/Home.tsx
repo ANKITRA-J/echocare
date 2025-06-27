@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Heart, 
@@ -12,8 +12,24 @@ import {
   Play,
   CheckCircle
 } from 'lucide-react';
+import { useAuth } from '../components/auth/AuthProvider';
 
 const Home: React.FC = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // If user is logged in, redirect to dashboard
+  React.useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
+
+  // Don't render anything if user is logged in (will redirect)
+  if (user) {
+    return null;
+  }
+
   const features = [
     {
       icon: Brain,
@@ -65,7 +81,7 @@ const Home: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link
-                to="/onboarding"
+                to="/signup"
                 className="bg-primary-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-primary-600 transition-colors duration-200 flex items-center group"
               >
                 Start Your Journey
@@ -224,7 +240,7 @@ const Home: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                to="/onboarding"
+                to="/signup"
                 className="bg-white text-primary-600 px-8 py-4 rounded-lg font-semibold hover:bg-cream-50 transition-colors duration-200"
               >
                 Start Free Trial
