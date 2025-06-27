@@ -12,13 +12,13 @@ import {
   Star
 } from 'lucide-react';
 import { useAuth } from '../components/auth/AuthProvider';
-import { useStripe } from '../hooks/useStripe';
+import { useCheckout } from '../hooks/useCheckout';
 import { useSubscription } from '../hooks/useSubscription';
 import { products } from '../stripe-config';
 
 const Pricing: React.FC = () => {
   const { user } = useAuth();
-  const { createCheckoutSession, loading: checkoutLoading, error: checkoutError } = useStripe();
+  const { createCheckoutSession, loading: checkoutLoading, error: checkoutError } = useCheckout();
   const { subscription, isActive } = useSubscription();
 
   const handleSubscribe = async () => {
@@ -28,7 +28,12 @@ const Pricing: React.FC = () => {
     }
 
     const product = products[0]; // EchoCare Premium
-    await createCheckoutSession(product.priceId);
+    await createCheckoutSession({
+      priceId: product.priceId,
+      mode: product.mode,
+      successUrl: `${window.location.origin}/success`,
+      cancelUrl: `${window.location.origin}/pricing`,
+    });
   };
 
   const plans = [
