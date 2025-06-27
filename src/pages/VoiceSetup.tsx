@@ -427,19 +427,19 @@ const VoiceSetup: React.FC = () => {
                             <div>
                               <p className="text-xs text-secondary-500 mb-1">Stability</p>
                               <p className="font-semibold text-secondary-800">
-                                {Math.round(voice.settings?.stability * 100)}%
+                                {voice.settings?.stability ? Math.round(voice.settings.stability * 100) : 50}%
                               </p>
                             </div>
                             <div>
                               <p className="text-xs text-secondary-500 mb-1">Similarity</p>
                               <p className="font-semibold text-secondary-800">
-                                {Math.round(voice.settings?.similarity_boost * 100)}%
+                                {voice.settings?.similarity_boost ? Math.round(voice.settings.similarity_boost * 100) : 50}%
                               </p>
                             </div>
                             <div>
                               <p className="text-xs text-secondary-500 mb-1">Style</p>
                               <p className="font-semibold text-secondary-800">
-                                {Math.round(voice.settings?.style * 100)}%
+                                {voice.settings?.style ? Math.round(voice.settings.style * 100) : 0}%
                               </p>
                             </div>
                             <div>
