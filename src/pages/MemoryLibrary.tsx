@@ -13,11 +13,14 @@ import {
   Share,
   Star
 } from 'lucide-react';
+import VideoPlayer from '../components/VideoPlayer';
 
 const MemoryLibrary: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEmotion, setSelectedEmotion] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
+  const [selectedMemory, setSelectedMemory] = useState<any>(null);
+  const [likedMemories, setLikedMemories] = useState<Set<number>>(new Set());
 
   const memories = [
     {
@@ -27,6 +30,7 @@ const MemoryLibrary: React.FC = () => {
       emotion: "joyful",
       duration: "2:34",
       thumbnail: "https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
       description: "A beautiful memory of our wedding day, with grandmother's emotional speech.",
       tags: ["wedding", "family", "celebration"],
       rating: 5,
@@ -39,6 +43,7 @@ const MemoryLibrary: React.FC = () => {
       emotion: "nostalgic",
       duration: "3:12",
       thumbnail: "https://images.pexels.com/photos/1001665/pexels-photo-1001665.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
       description: "My first successful fishing trip where I caught a salmon with dad's help.",
       tags: ["fishing", "father", "outdoor"],
       rating: 4,
@@ -51,6 +56,7 @@ const MemoryLibrary: React.FC = () => {
       emotion: "peaceful",
       duration: "1:45",
       thumbnail: "https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
       description: "A quiet birthday celebration with close family and homemade cake.",
       tags: ["birthday", "family", "cake"],
       rating: 4,
@@ -63,6 +69,7 @@ const MemoryLibrary: React.FC = () => {
       emotion: "joyful",
       duration: "4:20",
       thumbnail: "https://images.pexels.com/photos/1303081/pexels-photo-1303081.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
       description: "Opening presents under the tree with the whole family gathered around.",
       tags: ["christmas", "family", "presents"],
       rating: 5,
@@ -75,6 +82,7 @@ const MemoryLibrary: React.FC = () => {
       emotion: "peaceful",
       duration: "2:15",
       thumbnail: "https://images.pexels.com/photos/1002703/pexels-photo-1002703.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
       description: "Planting flowers in the backyard garden, learning about different varieties.",
       tags: ["garden", "mother", "flowers"],
       rating: 4,
@@ -87,6 +95,7 @@ const MemoryLibrary: React.FC = () => {
       emotion: "nostalgic",
       duration: "3:45",
       thumbnail: "https://images.pexels.com/photos/1205651/pexels-photo-1205651.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop",
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
       description: "Walking across the stage to receive my diploma, family cheering in the audience.",
       tags: ["graduation", "school", "achievement"],
       rating: 5,
@@ -124,6 +133,47 @@ const MemoryLibrary: React.FC = () => {
     return matchesSearch && matchesEmotion && matchesYear;
   });
 
+  const handlePlayMemory = (memory: any) => {
+    setSelectedMemory(memory);
+  };
+
+  const handleLikeMemory = (memoryId: number) => {
+    setLikedMemories(prev => {
+      const newLiked = new Set(prev);
+      if (newLiked.has(memoryId)) {
+        newLiked.delete(memoryId);
+      } else {
+        newLiked.add(memoryId);
+      }
+      return newLiked;
+    });
+  };
+
+  const handleShareMemory = (memory: any) => {
+    if (navigator.share) {
+      navigator.share({
+        title: memory.title,
+        text: memory.description,
+        url: window.location.href,
+      });
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(`${memory.title} - ${window.location.href}`);
+      alert('Memory link copied to clipboard!');
+    }
+  };
+
+  const handleDownloadMemory = (memory: any) => {
+    // Create a temporary link to download the video
+    const link = document.createElement('a');
+    link.href = memory.videoUrl;
+    link.download = `${memory.title}.mp4`;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -138,6 +188,56 @@ const MemoryLibrary: React.FC = () => {
           Browse and relive your precious memories. Each video is personalized with AI-generated narration.
         </p>
       </motion.div>
+
+      {/* Video Player Modal */}
+      {selectedMemory && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedMemory(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            className="bg-white rounded-xl overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-cream-200">
+              <h2 className="text-xl font-bold text-secondary-800">{selectedMemory.title}</h2>
+              <p className="text-secondary-600">{selectedMemory.date}</p>
+            </div>
+            
+            <div className="flex-1 bg-black">
+              <VideoPlayer
+                src={selectedMemory.videoUrl}
+                title={selectedMemory.title}
+                poster={selectedMemory.thumbnail}
+                className="w-full h-96"
+              />
+            </div>
+            
+            <div className="p-4">
+              <p className="text-secondary-700 mb-4">{selectedMemory.description}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex flex-wrap gap-2">
+                  {selectedMemory.tags.map((tag: string) => (
+                    <span key={tag} className="bg-cream-100 text-secondary-600 px-2 py-1 rounded-full text-xs">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setSelectedMemory(null)}
+                  className="bg-secondary-500 text-white px-4 py-2 rounded-lg hover:bg-secondary-600 transition-colors duration-200"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
 
       {/* Search and Filters */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
@@ -211,7 +311,10 @@ const MemoryLibrary: React.FC = () => {
                 className="w-full h-48 object-cover"
               />
               <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <button className="bg-white bg-opacity-90 text-primary-600 p-3 rounded-full hover:bg-opacity-100 transition-all duration-200">
+                <button 
+                  onClick={() => handlePlayMemory(memory)}
+                  className="bg-white bg-opacity-90 text-primary-600 p-3 rounded-full hover:bg-opacity-100 transition-all duration-200"
+                >
                   <Play className="h-6 w-6" />
                 </button>
               </div>
@@ -263,18 +366,34 @@ const MemoryLibrary: React.FC = () => {
 
               {/* Actions */}
               <div className="flex items-center justify-between">
-                <button className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors duration-200 flex items-center text-sm">
+                <button 
+                  onClick={() => handlePlayMemory(memory)}
+                  className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors duration-200 flex items-center text-sm"
+                >
                   <Play className="h-4 w-4 mr-2" />
                   Play Memory
                 </button>
                 <div className="flex items-center space-x-2">
-                  <button className="p-2 text-secondary-400 hover:text-secondary-600 transition-colors duration-200">
-                    <Heart className="h-4 w-4" />
+                  <button 
+                    onClick={() => handleLikeMemory(memory.id)}
+                    className={`p-2 transition-colors duration-200 ${
+                      likedMemories.has(memory.id) 
+                        ? 'text-error-500 hover:text-error-600' 
+                        : 'text-secondary-400 hover:text-secondary-600'
+                    }`}
+                  >
+                    <Heart className={`h-4 w-4 ${likedMemories.has(memory.id) ? 'fill-current' : ''}`} />
                   </button>
-                  <button className="p-2 text-secondary-400 hover:text-secondary-600 transition-colors duration-200">
+                  <button 
+                    onClick={() => handleShareMemory(memory)}
+                    className="p-2 text-secondary-400 hover:text-secondary-600 transition-colors duration-200"
+                  >
                     <Share className="h-4 w-4" />
                   </button>
-                  <button className="p-2 text-secondary-400 hover:text-secondary-600 transition-colors duration-200">
+                  <button 
+                    onClick={() => handleDownloadMemory(memory)}
+                    className="p-2 text-secondary-400 hover:text-secondary-600 transition-colors duration-200"
+                  >
                     <Download className="h-4 w-4" />
                   </button>
                 </div>

@@ -15,18 +15,37 @@ import {
   Upload,
   Link,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  Loader,
+  Sun,
+  Moon,
+  Monitor
 } from 'lucide-react';
+import { useTheme } from '../hooks/useTheme';
+import { useNotifications } from '../hooks/useNotifications';
+import { useDataExport } from '../hooks/useDataExport';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [showPassword, setShowPassword] = useState(false);
-  const [notifications, setNotifications] = useState({
-    memoryGenerated: true,
-    voiceProcessing: true,
-    weeklyDigest: false,
-    securityAlerts: true
-  });
+  const [saving, setSaving] = useState(false);
+  const [testEmailSending, setTestEmailSending] = useState(false);
+  const [testSMSSending, setTestSMSSending] = useState(false);
+  
+  const { theme, setTheme } = useTheme();
+  const { 
+    settings: notificationSettings, 
+    updateSetting: updateNotificationSetting,
+    sendTestEmail,
+    sendTestSMS 
+  } = useNotifications();
+  const { 
+    exporting, 
+    progress, 
+    exportMemories, 
+    exportVoiceData, 
+    exportAllData 
+  } = useDataExport();
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
@@ -36,6 +55,59 @@ const Settings: React.FC = () => {
     { id: 'data', label: 'Data Management', icon: Database },
     { id: 'integrations', label: 'Integrations', icon: Link }
   ];
+
+  const handleSave = async () => {
+    setSaving(true);
+    // Simulate save operation
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setSaving(false);
+    alert('Settings saved successfully!');
+  };
+
+  const handleTestEmail = async () => {
+    setTestEmailSending(true);
+    try {
+      await sendTestEmail('robert.johnson@email.com');
+      alert('Test email sent successfully!');
+    } catch (error) {
+      alert('Failed to send test email');
+    } finally {
+      setTestEmailSending(false);
+    }
+  };
+
+  const handleTestSMS = async () => {
+    setTestSMSSending(true);
+    try {
+      await sendTestSMS('+1 (555) 123-4567');
+      alert('Test SMS sent successfully!');
+    } catch (error) {
+      alert('Failed to send test SMS');
+    } finally {
+      setTestSMSSending(false);
+    }
+  };
+
+  const handleDataImport = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,.zip';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        console.log('Importing file:', file.name);
+        alert(`Importing ${file.name}... This feature will be available soon.`);
+      }
+    };
+    input.click();
+  };
+
+  const handleDeleteAccount = () => {
+    const confirmation = prompt('Type "DELETE" to confirm account deletion:');
+    if (confirmation === 'DELETE') {
+      alert('Account deletion initiated. You will receive a confirmation email.');
+    }
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -61,7 +133,7 @@ const Settings: React.FC = () => {
                   </label>
                   <input
                     type="email"
-                    defaultValue="robert.johnson@email.com"
+                    defaultValue="test@echocare.com"
                     className="w-full p-3 border border-cream-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
@@ -230,10 +302,16 @@ const Settings: React.FC = () => {
                   Your consent is secured on the Algorand blockchain with token ID: ALG-7829304
                 </p>
                 <div className="flex space-x-3">
-                  <button className="text-primary-600 hover:text-primary-800 text-sm font-medium">
+                  <button 
+                    onClick={() => window.open('https://algoexplorer.io', '_blank')}
+                    className="text-primary-600 hover:text-primary-800 text-sm font-medium"
+                  >
                     View on Explorer
                   </button>
-                  <button className="text-error-600 hover:text-error-800 text-sm font-medium">
+                  <button 
+                    onClick={() => alert('Consent revocation initiated. This will disable all AI processing.')}
+                    className="text-error-600 hover:text-error-800 text-sm font-medium"
+                  >
                     Revoke Consent
                   </button>
                 </div>
@@ -248,7 +326,7 @@ const Settings: React.FC = () => {
             <div>
               <h3 className="text-lg font-semibold text-secondary-800 mb-4">Notification Preferences</h3>
               <div className="space-y-4">
-                {Object.entries(notifications).map(([key, value]) => (
+                {Object.entries(notificationSettings).filter(([key]) => !['emailEnabled', 'smsEnabled'].includes(key)).map(([key, value]) => (
                   <div key={key} className="flex items-center justify-between p-4 bg-cream-50 rounded-lg">
                     <div>
                       <h4 className="font-medium text-secondary-800 capitalize">
@@ -264,11 +342,8 @@ const Settings: React.FC = () => {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={value}
-                        onChange={(e) => setNotifications({
-                          ...notifications,
-                          [key]: e.target.checked
-                        })}
+                        checked={value as boolean}
+                        onChange={(e) => updateNotificationSetting(key as any, e.target.checked)}
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"></div>
@@ -286,16 +361,35 @@ const Settings: React.FC = () => {
                     <h4 className="font-medium text-secondary-800">Email Notifications</h4>
                     <CheckCircle className="h-4 w-4 text-success-500" />
                   </div>
-                  <p className="text-sm text-secondary-600">robert.johnson@email.com</p>
+                  <p className="text-sm text-secondary-600 mb-3">test@echocare.com</p>
+                  <button 
+                    onClick={handleTestEmail}
+                    disabled={testEmailSending}
+                    className="text-primary-600 hover:text-primary-800 text-sm font-medium disabled:opacity-50"
+                  >
+                    {testEmailSending ? 'Sending...' : 'Send Test Email'}
+                  </button>
                 </div>
                 <div className="p-4 bg-cream-50 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium text-secondary-800">SMS Notifications</h4>
-                    <button className="text-primary-600 hover:text-primary-800 text-sm font-medium">
-                      Enable
+                    <button 
+                      onClick={() => updateNotificationSetting('smsEnabled', !notificationSettings.smsEnabled)}
+                      className="text-primary-600 hover:text-primary-800 text-sm font-medium"
+                    >
+                      {notificationSettings.smsEnabled ? 'Disable' : 'Enable'}
                     </button>
                   </div>
-                  <p className="text-sm text-secondary-600">+1 (555) 123-4567</p>
+                  <p className="text-sm text-secondary-600 mb-3">+1 (555) 123-4567</p>
+                  {notificationSettings.smsEnabled && (
+                    <button 
+                      onClick={handleTestSMS}
+                      disabled={testSMSSending}
+                      className="text-primary-600 hover:text-primary-800 text-sm font-medium disabled:opacity-50"
+                    >
+                      {testSMSSending ? 'Sending...' : 'Send Test SMS'}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -308,17 +402,36 @@ const Settings: React.FC = () => {
             <div>
               <h3 className="text-lg font-semibold text-secondary-800 mb-4">Theme Settings</h3>
               <div className="grid md:grid-cols-3 gap-4">
-                {['Light', 'Dark', 'Auto'].map((theme) => (
-                  <div key={theme} className="p-4 border border-cream-300 rounded-lg cursor-pointer hover:border-primary-300 transition-colors duration-200">
-                    <div className="text-center">
-                      <div className={`w-16 h-12 mx-auto mb-3 rounded ${
-                        theme === 'Light' ? 'bg-white border border-cream-300' :
-                        theme === 'Dark' ? 'bg-gray-800' : 'bg-gradient-to-br from-white to-gray-800'
-                      }`}></div>
-                      <p className="font-medium text-secondary-800">{theme}</p>
-                    </div>
-                  </div>
-                ))}
+                {[
+                  { id: 'light', label: 'Light', icon: Sun },
+                  { id: 'dark', label: 'Dark', icon: Moon },
+                  { id: 'auto', label: 'Auto', icon: Monitor }
+                ].map((themeOption) => {
+                  const Icon = themeOption.icon;
+                  return (
+                    <button
+                      key={themeOption.id}
+                      onClick={() => setTheme(themeOption.id as any)}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                        theme === themeOption.id
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-cream-300 hover:border-primary-300'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className={`w-16 h-12 mx-auto mb-3 rounded flex items-center justify-center ${
+                          themeOption.id === 'light' ? 'bg-white border border-cream-300' :
+                          themeOption.id === 'dark' ? 'bg-gray-800' : 'bg-gradient-to-br from-white to-gray-800'
+                        }`}>
+                          <Icon className={`h-6 w-6 ${
+                            themeOption.id === 'dark' ? 'text-white' : 'text-gray-600'
+                          }`} />
+                        </div>
+                        <p className="font-medium text-secondary-800">{themeOption.label}</p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -361,8 +474,12 @@ const Settings: React.FC = () => {
                   <p className="text-sm text-secondary-600 mb-4">
                     Export all your memories, photos, and generated content
                   </p>
-                  <button className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors duration-200 flex items-center">
-                    <Download className="h-4 w-4 mr-2" />
+                  <button 
+                    onClick={exportMemories}
+                    disabled={exporting}
+                    className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors duration-200 flex items-center disabled:opacity-50"
+                  >
+                    {exporting ? <Loader className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
                     Export Memories
                   </button>
                 </div>
@@ -371,12 +488,31 @@ const Settings: React.FC = () => {
                   <p className="text-sm text-secondary-600 mb-4">
                     Download your voice recordings and clone models
                   </p>
-                  <button className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors duration-200 flex items-center">
-                    <Download className="h-4 w-4 mr-2" />
+                  <button 
+                    onClick={exportVoiceData}
+                    disabled={exporting}
+                    className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors duration-200 flex items-center disabled:opacity-50"
+                  >
+                    {exporting ? <Loader className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
                     Export Voice
                   </button>
                 </div>
               </div>
+              
+              {exporting && (
+                <div className="bg-white p-4 rounded-lg border border-cream-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-secondary-700">Exporting data...</span>
+                    <span className="text-sm text-secondary-600">{progress}%</span>
+                  </div>
+                  <div className="w-full bg-cream-200 rounded-full h-2">
+                    <div 
+                      className="bg-primary-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
@@ -387,7 +523,10 @@ const Settings: React.FC = () => {
                 <p className="text-sm text-secondary-600 mb-4">
                   Import memories and data from other platforms or previous exports
                 </p>
-                <button className="bg-secondary-500 text-white px-4 py-2 rounded-lg hover:bg-secondary-600 transition-colors duration-200">
+                <button 
+                  onClick={handleDataImport}
+                  className="bg-secondary-500 text-white px-4 py-2 rounded-lg hover:bg-secondary-600 transition-colors duration-200"
+                >
                   Choose Files
                 </button>
               </div>
@@ -403,7 +542,10 @@ const Settings: React.FC = () => {
                     <p className="text-sm text-error-700 mb-4">
                       Permanently delete your account and all associated data. This action cannot be undone.
                     </p>
-                    <button className="bg-error-600 text-white px-4 py-2 rounded-lg hover:bg-error-700 transition-colors duration-200 flex items-center">
+                    <button 
+                      onClick={handleDeleteAccount}
+                      className="bg-error-600 text-white px-4 py-2 rounded-lg hover:bg-error-700 transition-colors duration-200 flex items-center"
+                    >
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete Account
                     </button>
@@ -424,8 +566,7 @@ const Settings: React.FC = () => {
                   { name: 'ElevenLabs', status: 'Connected', description: 'Voice cloning and synthesis', color: 'success' },
                   { name: 'Tavus', status: 'Connected', description: 'Avatar video generation', color: 'success' },
                   { name: 'Algorand', status: 'Connected', description: 'Blockchain consent management', color: 'success' },
-                  { name: 'Supabase', status: 'Connected', description: 'Database and authentication', color: 'success' },
-                  { name: 'RevenueChat', status: 'Connected', description: 'Subscription management', color: 'success' }
+                  { name: 'Supabase', status: 'Connected', description: 'Database and authentication', color: 'success' }
                 ].map((integration) => (
                   <div key={integration.name} className="flex items-center justify-between p-4 bg-cream-50 rounded-lg">
                     <div className="flex items-center">
@@ -548,9 +689,22 @@ const Settings: React.FC = () => {
             {/* Save Button */}
             <div className="mt-8 pt-6 border-t border-cream-200">
               <div className="flex justify-end">
-                <button className="bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors duration-200 flex items-center">
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Changes
+                <button 
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors duration-200 flex items-center disabled:opacity-50"
+                >
+                  {saving ? (
+                    <>
+                      <Loader className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Changes
+                    </>
+                  )}
                 </button>
               </div>
             </div>

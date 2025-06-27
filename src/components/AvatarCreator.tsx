@@ -41,41 +41,65 @@ const AvatarCreator: React.FC<AvatarCreatorProps> = ({ onVideoCreated }) => {
   }, []);
 
   const loadReplicas = async () => {
-    const replicaData = await getReplicas();
-    setReplicas(replicaData);
+    try {
+      const replicaData = await getReplicas();
+      setReplicas(replicaData);
+    } catch (error) {
+      console.error('Failed to load replicas:', error);
+    }
   };
 
   const loadVideos = async () => {
-    const videoData = await getVideos();
-    setVideos(videoData);
+    try {
+      const videoData = await getVideos();
+      setVideos(videoData);
+    } catch (error) {
+      console.error('Failed to load videos:', error);
+    }
   };
 
   const handleCreateVideo = async () => {
     if (!script.trim()) {
+      alert('Please enter a script for your video.');
       return;
     }
 
-    const result = await createAvatar({
-      script: script.trim(),
-      avatarId: selectedReplica,
-      voiceId: selectedVoice,
-      background,
-    });
+    try {
+      const result = await createAvatar({
+        script: script.trim(),
+        avatarId: selectedReplica,
+        voiceId: selectedVoice,
+        background,
+      });
 
-    if (result && onVideoCreated) {
-      onVideoCreated(result.video_url);
-      loadVideos(); // Refresh video list
+      if (result && onVideoCreated) {
+        onVideoCreated(result.video_url);
+        loadVideos(); // Refresh video list
+        alert('Video creation started! Check the Video Library tab for progress.');
+      }
+    } catch (error: any) {
+      alert(`Failed to create video: ${error.message}`);
     }
   };
 
-  const handleCreateReplica = async (videoUrl: string, name: string) => {
-    const result = await createReplica({
-      videoUrl,
-      replicaName: name,
-    });
+  const handleCreateReplica = async () => {
+    const videoUrl = prompt('Enter the training video URL:');
+    const name = prompt('Enter a name for this avatar:');
+    
+    if (!videoUrl || !name) return;
 
-    if (result) {
-      loadReplicas(); // Refresh replica list
+    try {
+      const result = await createReplica({
+        videoUrl,
+        replicaName: name,
+      });
+
+      if (result) {
+        loadReplicas(); // Refresh replica list
+        alert('Avatar creation started! This may take several minutes to process.');
+      }
+    } catch (error: any) {
+      alert(`Failed to create avatar: ${error.message}`);
     }
   };
 
@@ -120,7 +144,7 @@ const AvatarCreator: React.FC<AvatarCreatorProps> = ({ onVideoCreated }) => {
       <div className="p-6">
         {error && (
           <div className="mb-6 bg-error-50 border border-error-200 text-error-700 px-4 py-3 rounded-lg flex items-center">
-            <AlertCircle className="h-4 w-4 mr-2" />
+            <AlertCircle className="h-4 w-4 mr-2"  />
             {error}
           </div>
         )}
@@ -236,7 +260,10 @@ const AvatarCreator: React.FC<AvatarCreatorProps> = ({ onVideoCreated }) => {
               <h3 className="text-lg font-semibold text-secondary-800">
                 Avatar Replicas
               </h3>
-              <button className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors duration-200 flex items-center">
+              <button 
+                onClick={handleCreateReplica}
+                className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors duration-200 flex items-center"
+              >
                 <Upload className="h-4 w-4 mr-2" />
                 Create New
               </button>

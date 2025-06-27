@@ -13,11 +13,10 @@ import {
   Download,
   Settings
 } from 'lucide-react';
+import AudioRecorder from '../components/AudioRecorder';
+import FileUploadZone from '../components/FileUploadZone';
 
 const VoiceSetup: React.FC = () => {
-  const [isRecording, setIsRecording] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
   const [activeTab, setActiveTab] = useState('record');
 
   const voiceClones = [
@@ -73,10 +72,29 @@ const VoiceSetup: React.FC = () => {
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  const handleRecordingComplete = (audioBlob: Blob, audioUrl: string) => {
+    console.log('Recording completed:', { audioBlob, audioUrl });
+    // Here you would typically upload to your voice cloning service
+  };
+
+  const handleFilesUploaded = (files: any[]) => {
+    console.log('Files uploaded:', files);
+    // Here you would process the uploaded audio files
+  };
+
+  const handleTestVoice = (cloneId: number) => {
+    // Simulate voice test
+    const utterance = new SpeechSynthesisUtterance(
+      "Hello, this is a test of my voice clone. How does it sound?"
+    );
+    speechSynthesis.speak(utterance);
+  };
+
+  const handleDeleteClone = (cloneId: number) => {
+    if (confirm('Are you sure you want to delete this voice clone?')) {
+      console.log('Deleting voice clone:', cloneId);
+      // Here you would delete the voice clone
+    }
   };
 
   return (
@@ -131,68 +149,20 @@ const VoiceSetup: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="max-w-2xl mx-auto text-center"
+              className="max-w-2xl mx-auto"
             >
-              <div className="bg-primary-50 p-8 rounded-xl mb-8">
+              <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-secondary-800 mb-4">Record Your Voice</h2>
-                <p className="text-secondary-600 mb-6">
+                <p className="text-secondary-600">
                   For best results, record in a quiet environment and speak naturally for at least 5 minutes.
                 </p>
-
-                {/* Recording Controls */}
-                <div className="flex items-center justify-center space-x-4 mb-6">
-                  <button
-                    onClick={() => setIsRecording(!isRecording)}
-                    className={`
-                      w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300
-                      ${isRecording 
-                        ? 'bg-error-500 text-white hover:bg-error-600' 
-                        : 'bg-primary-500 text-white hover:bg-primary-600'
-                      }
-                    `}
-                  >
-                    {isRecording ? <Square className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
-                  </button>
-                  
-                  {recordingTime > 0 && (
-                    <>
-                      <button
-                        onClick={() => setIsPlaying(!isPlaying)}
-                        className="w-12 h-12 rounded-full bg-secondary-500 text-white flex items-center justify-center hover:bg-secondary-600 transition-colors duration-200"
-                      >
-                        {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                      </button>
-                      
-                      <button
-                        onClick={() => setRecordingTime(0)}
-                        className="w-12 h-12 rounded-full bg-error-500 text-white flex items-center justify-center hover:bg-error-600 transition-colors duration-200"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                {/* Recording Status */}
-                <div className="text-center">
-                  {isRecording ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-pulse bg-error-500 w-3 h-3 rounded-full mr-2"></div>
-                      <span className="text-error-600 font-medium">Recording... {formatTime(recordingTime)}</span>
-                    </div>
-                  ) : recordingTime > 0 ? (
-                    <div className="text-success-600 font-medium">
-                      Recording complete: {formatTime(recordingTime)}
-                    </div>
-                  ) : (
-                    <div className="text-secondary-600">
-                      Click the microphone to start recording
-                    </div>
-                  )}
-                </div>
               </div>
 
-              {/* Recording Tips */}
+              <AudioRecorder 
+                onRecordingComplete={handleRecordingComplete}
+                className="mb-6"
+              />
+
               <div className="bg-cream-100 p-6 rounded-lg">
                 <h3 className="font-semibold text-secondary-800 mb-3">Recording Tips</h3>
                 <div className="grid md:grid-cols-2 gap-4 text-sm text-secondary-600">
@@ -214,18 +184,6 @@ const VoiceSetup: React.FC = () => {
                   </div>
                 </div>
               </div>
-
-              {recordingTime >= 300 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-6"
-                >
-                  <button className="bg-primary-500 text-white px-8 py-3 rounded-lg hover:bg-primary-600 transition-colors duration-200 font-semibold">
-                    Process Voice Clone
-                  </button>
-                </motion.div>
-              )}
             </motion.div>
           )}
 
@@ -244,17 +202,15 @@ const VoiceSetup: React.FC = () => {
                 </p>
               </div>
 
-              {/* Upload Area */}
-              <div className="border-2 border-dashed border-cream-300 rounded-xl p-12 text-center hover:border-primary-300 transition-colors duration-200 cursor-pointer mb-6">
-                <Upload className="h-16 w-16 text-secondary-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-secondary-800 mb-2">Drop audio files here</h3>
-                <p className="text-secondary-600 mb-4">or click to browse your computer</p>
-                <button className="bg-primary-500 text-white px-6 py-2 rounded-lg hover:bg-primary-600 transition-colors duration-200">
-                  Choose Files
-                </button>
-              </div>
+              <FileUploadZone
+                accept={{
+                  'audio/*': ['.mp3', '.wav', '.m4a', '.flac', '.ogg']
+                }}
+                maxSize={100 * 1024 * 1024} // 100MB for audio files
+                onFilesUploaded={handleFilesUploaded}
+                className="mb-6"
+              />
 
-              {/* File Requirements */}
               <div className="bg-cream-100 p-6 rounded-lg">
                 <h3 className="font-semibold text-secondary-800 mb-3">File Requirements</h3>
                 <div className="grid md:grid-cols-2 gap-4 text-sm text-secondary-600">
@@ -288,7 +244,10 @@ const VoiceSetup: React.FC = () => {
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-secondary-800">Voice Clones</h2>
-                <button className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors duration-200 flex items-center">
+                <button 
+                  onClick={() => setActiveTab('record')}
+                  className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors duration-200 flex items-center"
+                >
                   <Mic className="h-4 w-4 mr-2" />
                   Create New Clone
                 </button>
@@ -356,18 +315,32 @@ const VoiceSetup: React.FC = () => {
                       <div className="flex items-center space-x-2 ml-4">
                         {(clone.status === 'active' || clone.status === 'completed') && (
                           <>
-                            <button className="p-2 text-secondary-600 hover:text-secondary-800 transition-colors duration-200">
+                            <button 
+                              onClick={() => handleTestVoice(clone.id)}
+                              className="p-2 text-secondary-600 hover:text-secondary-800 transition-colors duration-200"
+                              title="Test Voice"
+                            >
                               <Play className="h-4 w-4" />
                             </button>
-                            <button className="p-2 text-secondary-600 hover:text-secondary-800 transition-colors duration-200">
+                            <button 
+                              className="p-2 text-secondary-600 hover:text-secondary-800 transition-colors duration-200"
+                              title="Adjust Volume"
+                            >
                               <Volume2 className="h-4 w-4" />
                             </button>
-                            <button className="p-2 text-secondary-600 hover:text-secondary-800 transition-colors duration-200">
+                            <button 
+                              className="p-2 text-secondary-600 hover:text-secondary-800 transition-colors duration-200"
+                              title="Download"
+                            >
                               <Download className="h-4 w-4" />
                             </button>
                           </>
                         )}
-                        <button className="p-2 text-error-600 hover:text-error-800 transition-colors duration-200">
+                        <button 
+                          onClick={() => handleDeleteClone(clone.id)}
+                          className="p-2 text-error-600 hover:text-error-800 transition-colors duration-200"
+                          title="Delete"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -378,7 +351,10 @@ const VoiceSetup: React.FC = () => {
                         <p className="text-sm text-secondary-600">
                           This voice clone is currently being used for memory generation.
                         </p>
-                        <button className="text-primary-600 hover:text-primary-800 text-sm font-medium">
+                        <button 
+                          onClick={() => handleTestVoice(clone.id)}
+                          className="text-primary-600 hover:text-primary-800 text-sm font-medium"
+                        >
                           Test Voice
                         </button>
                       </div>
