@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, Heart } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Heart, UserRound } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 
 const LoginForm: React.FC = () => {
@@ -10,7 +10,7 @@ const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signIn } = useAuth();
+  const { signIn, signInAsGuest } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,6 +27,11 @@ const LoginForm: React.FC = () => {
     }
 
     setLoading(false);
+  };
+
+  const handleGuestLogin = () => {
+    signInAsGuest();
+    navigate('/dashboard');
   };
 
   return (
@@ -141,6 +146,30 @@ const LoginForm: React.FC = () => {
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-cream-300" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-cream-50 text-secondary-500">or</span>
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="button"
+              onClick={handleGuestLogin}
+              disabled={loading}
+              className="w-full flex justify-center items-center py-3 px-4 border border-cream-300 text-sm font-medium rounded-lg text-secondary-700 bg-white hover:bg-cream-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              <UserRound className="h-5 w-5 mr-2 text-secondary-500" />
+              Continue as guest
+            </button>
+            <p className="mt-2 text-center text-xs text-secondary-500">
+              Explore EchoCare without an account. Guest data isn't saved to the cloud.
+            </p>
           </div>
 
           <div className="text-center">
